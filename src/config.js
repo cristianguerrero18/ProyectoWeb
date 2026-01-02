@@ -9,5 +9,5 @@ export default {
     password : process.env.PASSWORD,
     jwtSecret: process.env.JWT_SECRET,
     jwtExpires: process.env.JWT_EXPIRES || "1h",
-    port : process.env.PORT-MYSQL
+    port : process.env.MYSQL_PORT
 }
