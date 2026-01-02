@@ -8,5 +8,6 @@ export default {
     user : process.env.USER,
     password : process.env.PASSWORD,
     jwtSecret: process.env.JWT_SECRET,
-    jwtExpires: process.env.JWT_EXPIRES || "1h"
+    jwtExpires: process.env.JWT_EXPIRES || "1h",
+    port : process.env.PORT
 }
