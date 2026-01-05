@@ -14,16 +14,21 @@ const NotificacionesModel = {
   },
 
   // Obtener rol por ID
-  getPorId: async (id_usuario) => {
-    try {
-      const conexion = await getConexion();
-      const [rows] = await conexion.query("SELECT * FROM notificaciones WHERE id_usuario = ?", [id_usuario]);
-      return rows[0] || null;
-    } catch (error) {
-      console.error("Error NotificacionesModel.getPorId:", error);
-      throw error;
-    }
-  },
+ // Obtener notificaciones por ID de usuario
+getPorId: async (id_usuario) => {
+  try {
+    const conexion = await getConexion();
+    const [rows] = await conexion.query(
+      "SELECT * FROM notificaciones WHERE id_usuario = ? ORDER BY fecha DESC", 
+      [id_usuario]
+    );
+    // Devuelve TODAS las filas, no solo la primera
+    return rows; // <- Cambia esto de rows[0] a rows
+  } catch (error) {
+    console.error("Error NotificacionesModel.getPorId:", error);
+    throw error;
+  }
+},
 
   // Eliminar rol
   eliminar: async (id_notificacion) => {

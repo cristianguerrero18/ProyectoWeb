@@ -53,14 +53,50 @@ const RecursosModel = {
     );
     return result.affectedRows;
   },
-
   eliminar: async (id_recurso) => {
-    const [result] = await conexion.query(
-      "DELETE FROM recursos WHERE id_recurso = ?",
-      [id_recurso]
-    );
-    return result.affectedRows;
+    try {
+      await conexion.beginTransaction();
+  
+      // 1️⃣ Favoritos
+      await conexion.query(
+        "DELETE FROM favoritos WHERE id_recurso = ?",
+        [id_recurso]
+      );
+  
+      // 2️⃣ Likes / Dislikes
+      await conexion.query(
+        "DELETE FROM recurso_likes WHERE id_recurso = ?",
+        [id_recurso]
+      );
+  
+      // 3️⃣ Comentarios
+      await conexion.query(
+        "DELETE FROM comentarios WHERE id_recurso = ?",
+        [id_recurso]
+      );
+  
+      // 4️⃣ Reportes
+      await conexion.query(
+        "DELETE FROM reportes WHERE id_recurso = ?",
+        [id_recurso]
+      );
+  
+      // 5️⃣ Recurso
+      const [result] = await conexion.query(
+        "DELETE FROM recursos WHERE id_recurso = ?",
+        [id_recurso]
+      );
+  
+      await conexion.commit();
+      return result.affectedRows;
+  
+    } catch (error) {
+      await conexion.rollback();
+      console.error("❌ Error eliminando recurso:", error);
+      throw error;
+    }
   },
+  
   cambiarEstado: async (id_recurso, activo) => {
     const [result] = await conexion.query(
       "UPDATE recursos SET activo = ? WHERE id_recurso = ?",
@@ -127,6 +163,97 @@ const RecursosModel = {
     );
   
     return rows;
+  },  
+  getDetalleCompleto: async (id_recurso) => {
+
+    // =========================
+    // Detalle principal
+    // =========================
+    const [rows] = await conexion.query(
+      `
+      SELECT 
+        r.id_recurso,
+        r.titulo,
+        r.tema,
+        r.URL,
+        r.PUBLIC_ID,
+        r.contador_reportes,
+        r.activo,
+  
+        a.id_asignatura,
+        a.nombre_asignatura AS asignatura,
+  
+        c.id_categoria,
+        c.nombre_categoria AS categoria,
+  
+        u.id_usuario,
+        u.nombres_usuario AS usuario,
+  
+        -- likes y dislikes
+        SUM(CASE WHEN rl.tipo = 'like' THEN 1 ELSE 0 END) AS total_likes,
+        SUM(CASE WHEN rl.tipo = 'dislike' THEN 1 ELSE 0 END) AS total_dislikes,
+  
+        -- total comentarios
+        COUNT(DISTINCT co.id_comentario) AS total_comentarios
+  
+      FROM recursos r
+      INNER JOIN asignaturas a ON r.id_asignatura = a.id_asignatura
+      INNER JOIN categorias c ON r.id_categoria = c.id_categoria
+      INNER JOIN usuarios u ON r.id_usuario = u.id_usuario
+  
+      LEFT JOIN recurso_likes rl ON rl.id_recurso = r.id_recurso
+      LEFT JOIN comentarios co ON co.id_recurso = r.id_recurso
+  
+      WHERE r.id_recurso = ?
+      GROUP BY r.id_recurso
+      `,
+      [id_recurso]
+    );
+  
+    if (!rows[0]) return null;
+  
+    // =========================
+    // REPORTES (array)
+    // =========================
+    const [reportes] = await conexion.query(
+      `
+      SELECT
+        rp.id_reporte,
+        rp.motivo,
+        rp.fecha_reporte,
+        rp.id_usuario
+      FROM reportes rp
+      WHERE rp.id_recurso = ?
+      ORDER BY rp.fecha_reporte DESC
+      `,
+      [id_recurso]
+    );
+  
+    // =========================
+    // COMENTARIOS (array)
+    // =========================
+    const [comentarios] = await conexion.query(
+      `
+      SELECT 
+        co.id_comentario,
+        co.comentario,
+        co.fecha,
+        u.id_usuario,
+        u.nombres_usuario AS usuario
+      FROM comentarios co
+      INNER JOIN usuarios u ON co.id_usuario = u.id_usuario
+      WHERE co.id_recurso = ?
+      ORDER BY co.fecha DESC
+      `,
+      [id_recurso]
+    );
+  
+    return {
+      ...rows[0],
+      total_reportes: reportes.length,
+      reportes,     // 👈 array real
+      comentarios
+    };  
   },  
 };
 

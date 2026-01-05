@@ -22,5 +22,7 @@
 
     router.put("/estado/:id_recurso", RecursoController.cambiarEstadoRecurso);
 
+// Detalle completo: likes, dislikes y comentarios
+router.get("/detalle/:id_recurso", RecursoController.getRecursoDetalle);
 
     export default router;
