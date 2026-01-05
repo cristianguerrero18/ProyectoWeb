@@ -48,16 +48,29 @@ const Tipo_carreraModel = {
   deleteTipoCarreras: async (id_tipo_carrera) => {
     try {
       const conexion = await getConexion();
+  
+      // 1️⃣ Verificar si existen carreras asociadas
+      const [[{ total }]] = await conexion.query(
+        "SELECT COUNT(*) AS total FROM carreras WHERE id_tipo_carrera = ?",
+        [id_tipo_carrera]
+      );
+  
+      if (total > 0) {
+        throw new Error("No se puede eliminar: existen carreras asociadas a este tipo");
+      }
+  
+      // 2️⃣ Eliminar tipo de carrera
       const [rows] = await conexion.query(
         "DELETE FROM tipo_carrera WHERE id_tipo_carrera = ?",
         [id_tipo_carrera]
       );
+  
       return rows.affectedRows;
     } catch (error) {
       console.error("Error Tipo_carreraModel.deleteTipoCarreras:", error);
       throw error;
     }
-  },
+  },  
 };
 
 export default Tipo_carreraModel;

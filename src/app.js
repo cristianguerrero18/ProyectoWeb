@@ -17,7 +17,10 @@ import LogRouter from "./routes/Admin/log_acceso.routes.js"
 import DashboardRouter from "./routes/Admin/dashboard.routes.js"
 import DerechosAutorRouter from "./routes/Admin/derechos_autor.routes.js"
 import FavoritosRouter from "./routes/Admin/favoritos.routes.js"
+import recursoLikesRoutes from './routes/Admin/recursoLikes.routes.js';
+import comentariosRoutes from './routes/Admin/comentarios.routes.js'
 
+// Agregar esta línea donde configuras tus otras rutas
 const app = express();
 
 app.set("PORT", 4000);
@@ -42,6 +45,9 @@ app.use("/api/logs",LogRouter);
 app.use("/api/dashboard",DashboardRouter);
 app.use("/api/derechos_autor",DerechosAutorRouter);
 app.use("/api/favoritos",FavoritosRouter);
+app.use('/api/comentarios', comentariosRoutes);
+
+app.use('/api/recurso-likes', recursoLikesRoutes);
 
 
 export default app;

@@ -235,7 +235,30 @@ const getRecursosPorUsuario = async (req, res) => {
       mensaje: `Error en la API: ${error.message}`
     });
   }
+
 };
+
+// Obtener recurso con likes, dislikes y comentarios
+const getRecursoDetalle = async (req, res) => {
+  const { id_recurso } = req.params;
+
+  try {
+    const recurso = await RecursosModel.getDetalleCompleto(id_recurso);
+
+    if (!recurso) {
+      return res.status(404).json({
+        mensaje: `No se encontró el recurso con ID ${id_recurso}`
+      });
+    }
+
+    res.json(recurso);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: `Error en la API: ${error.message}`
+    });
+  }
+};
+
 
 
 
@@ -247,5 +270,6 @@ export const RecursoController = {
  deleteRecursos,
  cambiarEstadoRecurso,
  getRecursosPorAsignatura,
- getRecursosPorUsuario
+ getRecursosPorUsuario,
+ getRecursoDetalle
 };
