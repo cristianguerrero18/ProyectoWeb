@@ -220,8 +220,7 @@ const RecursosModel = {
       SELECT
         rp.id_reporte,
         rp.motivo,
-        rp.fecha_reporte,
-        rp.id_usuario
+        rp.fecha_reporte
       FROM reportes rp
       WHERE rp.id_recurso = ?
       ORDER BY rp.fecha_reporte DESC
