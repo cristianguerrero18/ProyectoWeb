@@ -1,4 +1,4 @@
-import { FavoritosController } from "../../controllers/Admin/favoritos.controllers.js";
+import { FavoritosController } from "../../controllers/Usuarios/favoritos.controllers.js";
 import { Router } from "express";
 
 import { verificarToken } from "../../middlewares/auth.js";

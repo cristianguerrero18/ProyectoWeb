@@ -1,4 +1,4 @@
-import { ComentariosController } from "../../controllers/Admin/comentarios.controllers.js";
+import { ComentariosController } from "../../controllers/Usuarios/comentarios.controllers.js";
 import { Router } from "express";
 import { verificarToken } from "../../middlewares/auth.js";
 
