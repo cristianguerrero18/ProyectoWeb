@@ -105,6 +105,23 @@ Este código expira en 5 minutos.
   }
 };
 
+const existeCorreo = async (req, res) => {
+  const { correo } = req.params;
+
+  if (!correo) {
+    return res.status(400).json({ mensaje: "Correo requerido" });
+  }
+
+  try {
+    const existe = await UsuarioModel.existeCorreo(correo);
+    res.status(200).json({ existe });
+  } catch (error) {
+    console.error("Error existeCorreo:", error);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
+};
+
+
 /* ===========================
    LOGIN CON REGISTRO DE LOG
 =========================== */
@@ -456,4 +473,5 @@ export const method = {
   obtenerRolPorId,
   getLogsAcceso,
   getLogsPorUsuario,
+  existeCorreo, // ✅
 };

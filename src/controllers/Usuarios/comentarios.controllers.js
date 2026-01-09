@@ -1,4 +1,4 @@
-import ComentariosModel from "../../models/Admin/comentarios.models.js";
+import ComentariosModel from "../../models/Usuarios/comentarios.models.js";
 
 // Obtener comentarios de un recurso
 const getComentariosPorRecurso = async (req, res) => {

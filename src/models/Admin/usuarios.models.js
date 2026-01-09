@@ -124,7 +124,18 @@ const UsuarioModel = {
       "SELECT nombres_usuario, id_usuario FROM usuarios"
     );
     return rows;
-  },
+  },/* ===========================
+  VALIDAR SI EXISTE CORREO
+=========================== */
+existeCorreo: async (correo) => {
+ const [rows] = await conexion.query(
+   "SELECT 1 FROM usuarios WHERE correo = ? LIMIT 1",
+   [correo]
+ );
+ return rows.length > 0; // true = existe, false = no existe
+},
+
+
 
 };
 

@@ -1,4 +1,4 @@
-import FavoritosModel from "../../models/Admin/favoritos.models.js";
+import FavoritosModel from "../../models/Usuarios/favoritos.models.js";
 
 /* ===========================
    OBTENER FAVORITOS

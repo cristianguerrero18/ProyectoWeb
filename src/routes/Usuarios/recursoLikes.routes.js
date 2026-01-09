@@ -1,4 +1,4 @@
-import { RecursoLikesController } from "../../controllers/Admin/recursoLikes.controllers.js";
+import { RecursoLikesController } from "../../controllers/Usuarios/recursoLikes.controllers.js";
 import { Router } from "express";
 import { verificarToken } from "../../middlewares/auth.js";
 

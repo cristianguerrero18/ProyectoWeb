@@ -1,4 +1,4 @@
-import RecursoLikesModel from "../../models/Admin/recursoLikes.models.js";
+import RecursoLikesModel from "../../models/Usuarios/recursoLikes.models.js";
 
 // Obtener likes de un recurso
 const getLikesPorRecurso = async (req, res) => {

@@ -14,10 +14,7 @@ router.get("/:id", DerechosAutorController.getPorId);
 // Crear
 router.post("/", DerechosAutorController.post);
 
-// Actualizar
-router.put("/", DerechosAutorController.put);
-
 // Eliminar
-router.delete("/:id", DerechosAutorController.delete);
+router.delete("/:id", DerechosAutorController.eliminar);
 
 export default router;
