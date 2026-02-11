@@ -19,10 +19,8 @@ import DerechosAutorRouter from "./routes/Admin/derechos_autor.routes.js"
 import FavoritosRouter from "./routes/Usuarios/favoritos.routes.js"
 import recursoLikesRoutes from './routes/Usuarios/recursoLikes.routes.js';
 import comentariosRoutes from './routes/Usuarios/comentarios.routes.js'
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./docs/swagger.js";
 
-
+// Agregar esta línea donde configuras tus otras rutas
 const app = express();
 
 app.set("PORT", 4000);
@@ -32,7 +30,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/usuarios", UsuarioRouter);
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/validar-codigo",ValidarRouter)
 app.use("/api/roles",RolesRouter)
 app.use("/api/tipo_carrera",TipoCarreraRouter)
