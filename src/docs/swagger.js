@@ -18,7 +18,7 @@ const options = {
         description: "Servidor de desarrollo"
       },
       {
-        url: "https://proyectoweb-3.onrender.com/",
+        url: "https://api.sistemaacademico.com/api",
         description: "Servidor de producción"
       }
     ],
