@@ -1,82 +1,241 @@
 import NotificacionesModel from "../../models/Admin/notificaciones.models.js";
 
-// 
+// Validación simple de enteros
+const esIdValido = (valor) => {
+  const numero = Number(valor);
+  return Number.isInteger(numero) && numero > 0;
+};
+
+// Obtener todas las notificaciones
 const getNotificaciones = async (req, res) => {
   console.log("🔔 GET /api/notificaciones - Solicitando notificaciones...");
+
   try {
-    const notity = await NotificacionesModel.getTodos();
-    console.log(`📊 Notificaciones obtenidas: ${notity ? notity.length : 0}`);
-    
-    if (!notity || !notity.length) {
-      console.log("⚠️ No se encontraron notificaciones en la BD");
-      return res.status(404).json({ 
-        mensaje: "No se encontraron notificaciones",
-        error: false 
-      });
-    }
-    
-    console.log("✅ Enviando notificaciones al frontend");
-    res.json(notity);
+    const notificaciones = await NotificacionesModel.getTodos();
+
+    return res.status(200).json({
+      ok: true,
+      total: notificaciones.length,
+      data: notificaciones,
+      mensaje: "Notificaciones obtenidas correctamente",
+    });
   } catch (error) {
     console.error("❌ Error en getNotificaciones:", error.message);
-    res.status(500).json({ 
+    return res.status(500).json({
+      ok: false,
       mensaje: `Error en la API: ${error.message}`,
-      error: true 
     });
   }
 };
-// 
-const getNotifyPorId = async (req, res) => {
+
+// Obtener notificaciones por usuario
+const getNotificacionesPorUsuario = async (req, res) => {
   const { id_usuario } = req.params;
+
+  if (!esIdValido(id_usuario)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El id_usuario debe ser un número entero válido",
+    });
+  }
+
   try {
-    const notity = await NotificacionesModel.getPorId(id_usuario);
-    if (!notity) return res.status(404).json({ mensaje: `No se encontraron notificaciones del usuario con ID ${id_usuario}` });
-    res.json(notity);
+    const notificaciones = await NotificacionesModel.getPorUsuario(Number(id_usuario));
+
+    return res.status(200).json({
+      ok: true,
+      total: notificaciones.length,
+      data: notificaciones,
+      mensaje:
+        notificaciones.length > 0
+          ? "Notificaciones del usuario obtenidas correctamente"
+          : "El usuario no tiene notificaciones",
+    });
   } catch (error) {
-    res.status(500).json({ mensaje: `Error en la API: ${error.message}` });
+    console.error("❌ Error en getNotificacionesPorUsuario:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
   }
 };
 
-const deleteNotify = async (req, res) => {
-  const { id_notificacion } = req.params;
-  if (!id_notificacion) return res.status(400).json({ mensaje: "El ID del rol es obligatorio" });
+// Contar no leídas
+const getCantidadNoLeidas = async (req, res) => {
+  const { id_usuario } = req.params;
+
+  if (!esIdValido(id_usuario)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El id_usuario debe ser un número entero válido",
+    });
+  }
 
   try {
-    const eliminado = await NotificacionesModel.eliminar(id_notificacion);
-    if (!eliminado) return res.status(404).json({ mensaje: `No se encontró la notificacion con ID ${id_notificacion}` });
+    const total = await NotificacionesModel.contarNoLeidas(Number(id_usuario));
 
-    res.json({ mensaje: "Notificacion eliminada correctamente", id });
+    return res.status(200).json({
+      ok: true,
+      id_usuario: Number(id_usuario),
+      no_leidas: total,
+      mensaje: "Cantidad de notificaciones no leídas obtenida correctamente",
+    });
   } catch (error) {
-    res.status(500).json({ mensaje: `Error en la API: ${error.message}` });
+    console.error("❌ Error en getCantidadNoLeidas:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
   }
 };
 
-// controllers/Admin/notificaciones.controller.js
+// Crear notificación
+const createNotificacion = async (req, res) => {
+  const { id_usuario, titulo, mensaje, tipo, estado } = req.body;
 
+  if (!esIdValido(id_usuario)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El id_usuario es obligatorio y debe ser válido",
+    });
+  }
+
+  if (!titulo || !mensaje) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "Los campos titulo y mensaje son obligatorios",
+    });
+  }
+
+  try {
+    const id_notificacion = await NotificacionesModel.crear({
+      id_usuario: Number(id_usuario),
+      titulo: titulo.trim(),
+      mensaje: mensaje.trim(),
+      tipo: tipo?.trim() || "general",
+      estado: estado?.trim() || "no_visto",
+    });
+
+    return res.status(201).json({
+      ok: true,
+      id_notificacion,
+      mensaje: "Notificación creada correctamente",
+    });
+  } catch (error) {
+    console.error("❌ Error en createNotificacion:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
+  }
+};
+
+// Marcar una notificación como vista
 const updateEstadoVisto = async (req, res) => {
   const { id_notificacion } = req.params;
 
-  if (!id_notificacion) {
-    return res.status(400).json({ mensaje: "El ID de la notificación es obligatorio" });
+  if (!esIdValido(id_notificacion)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El ID de la notificación es obligatorio y debe ser válido",
+    });
   }
 
   try {
-    const actualizado = await NotificacionesModel.marcarComoVisto(id_notificacion);
+    const actualizado = await NotificacionesModel.marcarComoVisto(Number(id_notificacion));
 
     if (!actualizado) {
-      return res.status(404).json({ mensaje: "Notificación no encontrada" });
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Notificación no encontrada",
+      });
     }
 
-    res.json({ mensaje: "Notificación marcada como vista" });
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Notificación marcada como vista",
+    });
   } catch (error) {
-    res.status(500).json({ mensaje: `Error en la API: ${error.message}` });
+    console.error("❌ Error en updateEstadoVisto:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
   }
 };
 
+// Marcar todas las notificaciones de un usuario como vistas
+const updateTodasVistas = async (req, res) => {
+  const { id_usuario } = req.params;
+
+  if (!esIdValido(id_usuario)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El id_usuario debe ser un número entero válido",
+    });
+  }
+
+  try {
+    const actualizadas = await NotificacionesModel.marcarTodasComoVistas(Number(id_usuario));
+
+    return res.status(200).json({
+      ok: true,
+      actualizadas,
+      mensaje:
+        actualizadas > 0
+          ? "Todas las notificaciones se marcaron como vistas"
+          : "No había notificaciones pendientes por marcar",
+    });
+  } catch (error) {
+    console.error("❌ Error en updateTodasVistas:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
+  }
+};
+
+// Eliminar notificación
+const deleteNotify = async (req, res) => {
+  const { id_notificacion } = req.params;
+
+  if (!esIdValido(id_notificacion)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El ID de la notificación es obligatorio y debe ser válido",
+    });
+  }
+
+  try {
+    const eliminado = await NotificacionesModel.eliminar(Number(id_notificacion));
+
+    if (!eliminado) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: `No se encontró la notificación con ID ${id_notificacion}`,
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      id_notificacion: Number(id_notificacion),
+      mensaje: "Notificación eliminada correctamente",
+    });
+  } catch (error) {
+    console.error("❌ Error en deleteNotify:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: `Error en la API: ${error.message}`,
+    });
+  }
+};
 
 export const NotifyController = {
   getNotificaciones,
-  getNotifyPorId,
+  getNotificacionesPorUsuario,
+  getCantidadNoLeidas,
+  createNotificacion,
+  updateEstadoVisto,
+  updateTodasVistas,
   deleteNotify,
-  updateEstadoVisto
 };

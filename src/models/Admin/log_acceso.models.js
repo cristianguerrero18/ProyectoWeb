@@ -4,7 +4,7 @@ const conexion = await getConexion();
 
 const LogAccesoModel = {
   /* ===========================
-     REGISTRAR LOG DE ACCESO COMPLETO
+     REGISTRAR LOG DE ACCESO
   =========================== */
   insertLog: async (id_usuario, ip, user_agent = null, correo = null, nombres_usuario = null, apellidos_usuario = null) => {
     const [result] = await conexion.query(
@@ -17,7 +17,7 @@ const LogAccesoModel = {
   },
 
   /* ===========================
-     REGISTRAR LOG DE ACCESO (VERSIÓN MEJORADA)
+     REGISTRAR LOG DE ACCESO COMPLETO
   =========================== */
   insertLogCompleto: async (userData, ip, user_agent) => {
     const [result] = await conexion.query(
@@ -99,6 +99,101 @@ const LogAccesoModel = {
     );
     return rows;
   },
+
+  /* ===========================
+     ELIMINAR TODOS LOS LOGS (DELETE)
+     Mantiene el contador AUTO_INCREMENT
+  =========================== */
+  deleteAllLogs: async () => {
+    try {
+      console.log('📝 Ejecutando deleteAllLogs en el modelo');
+      
+      // Deshabilitar verificaciones de llaves foráneas
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 0');
+      
+      // Ejecutar DELETE
+      const [result] = await conexion.query('DELETE FROM logs_acceso');
+      
+      console.log(`✅ Eliminados ${result.affectedRows} registros`);
+      
+      // Volver a habilitar verificaciones
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      
+      return { 
+        success: true, 
+        message: 'Todos los logs han sido eliminados',
+        affectedRows: result.affectedRows 
+      };
+    } catch (error) {
+      console.error('❌ Error en deleteAllLogs:', error);
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      throw error;
+    }
+  },
+
+  /* ===========================
+     TRUNCAR TABLA DE LOGS (TRUNCATE)
+     Reinicia el contador AUTO_INCREMENT
+  =========================== */
+  truncateLogs: async () => {
+    try {
+      console.log('📝 Ejecutando truncateLogs en el modelo');
+      
+      // Deshabilitar verificaciones de llaves foráneas
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 0');
+      
+      // Ejecutar TRUNCATE
+      await conexion.query('TRUNCATE TABLE logs_acceso');
+      
+      console.log('✅ Tabla truncada exitosamente');
+      
+      // Volver a habilitar verificaciones
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      
+      return { 
+        success: true, 
+        message: 'Tabla de logs truncada exitosamente'
+      };
+    } catch (error) {
+      console.error('❌ Error en truncateLogs:', error);
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      throw error;
+    }
+  },
+
+  /* ===========================
+     ELIMINAR LOGS POR RANGO DE FECHAS
+  =========================== */
+  deleteLogsByDateRange: async (fecha_inicio, fecha_fin) => {
+    try {
+      console.log('📝 Ejecutando deleteLogsByDateRange:', { fecha_inicio, fecha_fin });
+      
+      // Deshabilitar verificaciones de llaves foráneas
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 0');
+      
+      // Ejecutar DELETE con rango de fechas
+      const [result] = await conexion.query(
+        `DELETE FROM logs_acceso 
+         WHERE DATE(fecha) BETWEEN ? AND ?`,
+        [fecha_inicio, fecha_fin]
+      );
+      
+      console.log(`✅ Eliminados ${result.affectedRows} registros`);
+      
+      // Volver a habilitar verificaciones
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      
+      return { 
+        success: true, 
+        message: `Logs eliminados desde ${fecha_inicio} hasta ${fecha_fin}`,
+        affectedRows: result.affectedRows 
+      };
+    } catch (error) {
+      console.error('❌ Error en deleteLogsByDateRange:', error);
+      await conexion.query('SET FOREIGN_KEY_CHECKS = 1');
+      throw error;
+    }
+  }
 };
 
 export default LogAccesoModel;

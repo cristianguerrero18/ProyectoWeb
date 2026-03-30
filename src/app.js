@@ -19,6 +19,8 @@ import DerechosAutorRouter from "./routes/Admin/derechos_autor.routes.js"
 import FavoritosRouter from "./routes/Usuarios/favoritos.routes.js"
 import recursoLikesRoutes from './routes/Usuarios/recursoLikes.routes.js';
 import comentariosRoutes from './routes/Usuarios/comentarios.routes.js'
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 // Agregar esta línea donde configuras tus otras rutas
 const app = express();
@@ -48,6 +50,13 @@ app.use("/api/favoritos",FavoritosRouter);
 app.use('/api/comentarios', comentariosRoutes);
 
 app.use('/api/recurso-likes', recursoLikesRoutes);
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+    })
+  );
 
 
 export default app;

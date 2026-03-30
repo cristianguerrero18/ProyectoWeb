@@ -27,13 +27,24 @@ const getAsignaturaPorId = async (req, res) => {
   }
 };
 
-// Crear asignaturas (validando duplicados)
 const postAsignaturas = async (req, res) => {
   try {
+    const asignaturas = Array.isArray(req.body) ? req.body : [req.body];
     const resultados = [];
 
-    for (const { nombre_asignatura } of req.body) {
+    for (const item of asignaturas) {
+      const nombre_asignatura = item?.nombre_asignatura?.trim();
+
+      if (!nombre_asignatura) {
+        resultados.push({
+          nombre_asignatura: null,
+          status: "nombre_asignatura requerido",
+        });
+        continue;
+      }
+
       const existe = await AsignaturaModel.getPorNombre(nombre_asignatura);
+
       if (existe) {
         resultados.push({ nombre_asignatura, status: "existente" });
         continue;
