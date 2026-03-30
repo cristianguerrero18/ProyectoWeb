@@ -2,45 +2,32 @@ import nodemailer from "nodemailer";
 
 export async function enviarEmail(destino, asunto, mensaje) {
   try {
-    console.log("EMAIL cargado:", process.env.EMAIL);
-    console.log("PASS existe:", !!process.env.PASS);
-
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: process.env.BREVO_SMTP_HOST,
+      port: Number(process.env.BREVO_SMTP_PORT),
+      secure: false, // true solo si usas 465
       auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASS,
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_PASS,
       },
     });
 
     const info = await transporter.sendMail({
-      from: process.env.EMAIL,
+      from: `"Plataforma UTS" <${process.env.BREVO_SMTP_USER}>`,
       to: destino,
       subject: asunto,
       text: mensaje,
     });
 
-    console.log("Correo enviado:", info);
-    console.log("accepted:", info.accepted);
-    console.log("rejected:", info.rejected);
-    console.log("response:", info.response);
-
     return { ok: true, info };
   } catch (error) {
-    console.error("Error enviando correo:");
-    console.error("message:", error.message);
-    console.error("code:", error.code);
-    console.error("response:", error.response);
-    console.error("responseCode:", error.responseCode);
-    console.error("command:", error.command);
-
+    console.error("Error enviando correo:", error);
     return {
       ok: false,
       error: error.message,
       code: error.code || null,
       response: error.response || null,
       responseCode: error.responseCode || null,
-      command: error.command || null,
     };
   }
 }
