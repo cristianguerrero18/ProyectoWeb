@@ -1,3 +1,4 @@
+
 import nodemailer from "nodemailer";
 
 export async function enviarEmail(destino, asunto, mensaje) {
@@ -8,28 +9,18 @@ export async function enviarEmail(destino, asunto, mensaje) {
         user: process.env.EMAIL,
         pass: process.env.PASS,
       },
-      logger: true,
-      debug: true,
     });
 
-    await transporter.verify();
-
-    const info = await transporter.sendMail({
-      from: `"Plataforma UTS" <${process.env.EMAIL}>`,
+    await transporter.sendMail({
+      from: process.env.EMAIL,
       to: destino,
       subject: asunto,
       text: mensaje,
     });
 
-    console.log("Correo enviado:", info);
-    return { ok: true, info };
+    return { ok: true };
   } catch (error) {
-    console.error("Error enviando correo:");
-    console.error("message:", error.message);
-    console.error("code:", error.code);
-    console.error("response:", error.response);
-    console.error("responseCode:", error.responseCode);
-    console.error("full error:", error);
-    return { ok: false, error: error.message };
+    console.log("Error enviando correo:", error);
+    return { ok: false };
   }
 }
