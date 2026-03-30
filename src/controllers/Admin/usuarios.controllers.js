@@ -93,11 +93,6 @@ Este código expira en 5 minutos.
     if (!enviado.ok) {
       return res.status(201).json({
         mensaje: "Usuario creado, pero el correo no pudo enviarse",
-        error: enviado.error,
-        code: enviado.code,
-        response: enviado.response,
-        responseCode: enviado.responseCode,
-        command: enviado.command,
       });
     }
 
