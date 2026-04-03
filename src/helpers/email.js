@@ -1,33 +1,43 @@
-import nodemailer from "nodemailer";
-
 export async function enviarEmail(destino, asunto, mensaje) {
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.BREVO_SMTP_HOST,
-      port: Number(process.env.BREVO_SMTP_PORT),
-      secure: false, // true solo si usas 465
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_PASS,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
       },
+      body: JSON.stringify({
+        sender: {
+          name: "uts",
+          email: "soporteplataformawebuts@gmail.com",
+        },
+        to: [
+          {
+            email: destino,
+          },
+        ],
+        subject: asunto,
+        textContent: mensaje,
+      }),
     });
 
-    const info = await transporter.sendMail({
-      from: `"Plataforma UTS" <${process.env.BREVO_SMTP_USER}>`,
-      to: destino,
-      subject: asunto,
-      text: mensaje,
-    });
+    const data = await response.json();
 
-    return { ok: true, info };
+    if (!response.ok) {
+      console.error("Error Brevo:", data);
+      return {
+        ok: false,
+        error: data.message || "No se pudo enviar el correo",
+      };
+    }
+
+    return { ok: true, data };
   } catch (error) {
     console.error("Error enviando correo:", error);
     return {
       ok: false,
       error: error.message,
-      code: error.code || null,
-      response: error.response || null,
-      responseCode: error.responseCode || null,
     };
   }
 }
