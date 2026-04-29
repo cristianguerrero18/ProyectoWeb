@@ -10,7 +10,7 @@ export async function enviarEmail(destino, asunto, mensaje) {
       body: JSON.stringify({
         sender: {
           name: "uts",
-          email: "soporteplataformawebuts@gmail.com",
+          email: "proyectosoporteplataformauts@gmail.com",
         },
         to: [
           {
